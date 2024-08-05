@@ -13,6 +13,19 @@
 
 %% PARSING DATA FILE
 
+% DATI SUI MEZZI
+% VettoreInterfacce: coordinata z di ciascuna interfaccia
+% n:                 indici di rifrazione di ogni mezzo
+%
+% DATI SULL'ONDA INCIDENTE
+% E_inc:             ampiezza del campo incidente
+% teta1:             angolo di incidenza di E_inc
+% vacuum_wavelength: lunghezza d'onda dell'onda nel vuoto
+% pol:               polarizzazione TM o TE dell'onda
+%
+% DATI SU ESPERIMENTI
+% z, x:              coordinate di tutti i punti su cui calcolare il campo
+
 data=importdata("data.txt");
 % definisco un counter per comodità
 c=data(1)+2;
