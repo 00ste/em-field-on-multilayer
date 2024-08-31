@@ -6,43 +6,27 @@ Field::Field(
 ) : interfaceZCoords(interfaceZCoords_), mediaRefractionIndexes(mediaRefractionIndexes_) {}
 
 void Field::calculateEHFields(
-    Polarization pol,
-    std::complex<float> lambda0,
-    std::complex<float> E1inc[3],
+    float incidenceAngle,
+    Polarization polarization,
+    float wavelength,
+    std::complex<float> E1inc,
     float xp,
     float zp
 ) {
     // Find which medium contains the point where the fields should be calculated.
     size_t mediumIndex = findMedium(zp);
 
-    // Calculate temporary E and H vectors.
-    std::complex<float> Etemp[3];
-    std::complex<float> Htemp[3];
-    VAmplitudeET(Etemp, Htemp, sinTheta, pol, mediumIndex, lambda0, E1inc, xp, zp);
-
-    // Finally calculate E and H.
-    float commonConst = mediaRefractionIndexes[mediumIndex] / ETA0;
-    float commonTerm = (Etemp[1] - Etemp[0]) / sqrt(1 - pow(sinTheta[mediumIndex], 2));
-    std::complex<float> sumEHTemp = 69; // TODO: This should be sum(MatrixEHProvv)
-
-    if (pol == TM) {
-        E[0] = sumEHTemp;
-        E[1] = 0;
-        E[2] = commonTerm * sinTheta[mediumIndex];
-
-        H[0] = 0;
-        H[1] = -commonConst * commonTerm;
-        H[2] = 0;
+    // Calculate the transmission matrix by combining all matrices from all media above the current one.
+    Matrix2x2 transmissionMatrix = Matrix2x2(1, 0, 0, 1);
+    for (size_t i = 0; i < mediumIndex; i++) {
+        transmissionMatrix *= propagationMatrix(interfaceZCoords[i], polarization, mediumIndex);
+        transmissionMatrix *= matchingMatrix(polarization, i);
     }
-    else { // pol == EM
-        E[0] = 0;
-        E[1] = sumEHTemp;
-        E[2] = 0;
 
-        H[0] = commonConst * commonTerm;
-        H[1] = 0;
-        H[2] = commonConst * sumEHTemp * sinTheta[mediumIndex];
-    }
+    // Combine the current transmission matrix with the propagation matrix in the current medium.
+    transmissionMatrix *= propagationMatrix(zp - interfaceZCoords[mediumIndex], polarization, mediumIndex);
+
+
 }
 
 size_t Field::findMedium(float zp) {

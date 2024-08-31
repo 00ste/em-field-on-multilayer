@@ -2,6 +2,7 @@
 #define FIELDS_H
 
 #include <complex>
+#include <csignal>
 #include <cstddef>
 #include <vector>
 #include <cmath>
@@ -19,6 +20,7 @@ struct Matrix2x2 {
     Matrix2x2(std::complex<float> e11_, std::complex<float> e12_, std::complex<float> e21_, std::complex<float> e22_)
         : e11(e11_), e12(e12_), e21(e21_), e22(e22_) {}
 
+    // TODO: Check multiplication order
     Matrix2x2& operator*=(const Matrix2x2& other) {
         Matrix2x2 old(this->e11, this->e12, this->e21, this->e22);
         this->e11 = old.e11 * other.e11 + old.e12 * other.e21;
@@ -45,6 +47,10 @@ public:
     const float ETA0 = C0 * MI0;
     const std::complex<float> I = std::complex<float>(0, 1);
 
+    // Output variables
+    std::complex<float> E[3];
+    std::complex<float> H[3];
+
     // PUBLIC METHODS
     Field(
         const std::vector<float>& interfaceZCoords_,
@@ -59,18 +65,18 @@ public:
     /**
      *  Calculcates the electric and magnetic fields E and H at the
      *  given point (xp, 0, zp).
-     *  @param theta1 The angle of incidence of the wave.
-     *  @param pol The polarization type of the wave.
-     *  @param lambda0 The wavelength ??
-     *  @param E1inc The value of the incident electric field.
+     *  @param incidenceAngle The angle of incidence of the wave.
+     *  @param polarization The polarization type of the wave.
+     *  @param wavelength The wavelength of the incident wave.
+     *  @param E1inc The amplitude of the incident electric field.
      *  @param xp The x coordinate of the point where the fields should be calculated.
      *  @param zp The z coordinate of the point where the fields should be calculated.
      */
     void calculateEHFields(
-        std::complex<float> theta1,
-        Polarization pol,
-        std::complex<float> lambda0,
-        std::complex<float> E1inc[3],
+        float incidenceAngle,
+        Polarization polarization,
+        float wavelength,
+        std::complex<float> E1inc,
         float xp,
         float zp
     );
@@ -89,10 +95,6 @@ private:
     float theta0;
     std::vector<float> cosTheta;
     std::vector<float> sinTheta;
-
-    // Output variables
-    std::complex<float> E[3];
-    std::complex<float> H[3];
 
     // PRIVATE METHODS
     /**
@@ -149,22 +151,22 @@ private:
     std::complex<float> transmissionCoefficient(Polarization pol, size_t mediumIndex);
 
     /**
-    *  Calculates the transmission matrix inside a medium at a given depth from the top.
+    *  Calculates the propagation matrix inside a medium at a given depth from the top.
     *  @param sinTheta The sines of the angles.
     *  @param pol The polarization of the wave.
     *  @param medium The index of the medium.
     *  @return the transmission coefficient.
     */
-    Matrix2x2 transmissionMatrixInMedium(int zDepth, Polarization pol, size_t mediumIndex);
+    Matrix2x2 propagationMatrix(int zDepth, Polarization pol, size_t mediumIndex);
 
     /**
-    *  Calculates the transmission matrix between one medium and the previous one.
+    *  Calculates the matching matrix between one medium and the previous one.
     *  @param sinTheta The sines of the angles.
     *  @param pol The polarization of the wave.
     *  @param medium The index of .
     *  @return the transmission coefficient.
     */
-    Matrix2x2 transmissionMatrixOnInterface(Polarization pol, size_t mediumIndex);
+    Matrix2x2 matchingMatrix(Polarization pol, size_t mediumIndex);
 
 };
 
