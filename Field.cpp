@@ -1,4 +1,6 @@
 #include "Field.h"
+#include <cerrno>
+#include <iostream>
 
 Field::Field(
     const std::vector<float>& interfaceZCoords_,
@@ -26,7 +28,11 @@ void Field::calculateEHFields(
     // Combine the current transmission matrix with the propagation matrix in the current medium.
     transmissionMatrix *= propagationMatrix(zp - interfaceZCoords[mediumIndex], polarization, mediumIndex);
 
+    Matrix2x2 progressiveRegressiveElectricField = Matrix2x2(E1inc, 0, 0, 0);
+    progressiveRegressiveElectricField *= transmissionMatrix;
 
+    std::cout << "E+: " << progressiveRegressiveElectricField.e11 << std::endl;
+    std::cout << "E-: " << progressiveRegressiveElectricField.e21 << std::endl;
 }
 
 size_t Field::findMedium(float zp) {

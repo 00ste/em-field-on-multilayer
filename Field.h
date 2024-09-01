@@ -7,31 +7,6 @@
 #include <vector>
 #include <cmath>
 
-/**
- *  A 2x2 matrix of std::complex<float> numbers.
- *  (lazy implementation: only required functions are defined)
- */
-struct Matrix2x2 {
-    std::complex<float> e11;
-    std::complex<float> e12;
-    std::complex<float> e21;
-    std::complex<float> e22;
-
-    Matrix2x2(std::complex<float> e11_, std::complex<float> e12_, std::complex<float> e21_, std::complex<float> e22_)
-        : e11(e11_), e12(e12_), e21(e21_), e22(e22_) {}
-
-    // TODO: Check multiplication order
-    Matrix2x2& operator*=(const Matrix2x2& other) {
-        Matrix2x2 old(this->e11, this->e12, this->e21, this->e22);
-        this->e11 = old.e11 * other.e11 + old.e12 * other.e21;
-        this->e12 = old.e11 * other.e21 + old.e12 * other.e22;
-        this->e21 = old.e21 * other.e11 + old.e22 * other.e21;
-        this->e22 = old.e21 * other.e12 + old.e22 * other.e22;
-        return *this;
-    }
-};
-
-
 class Field {
 public:
     // HELPER CLASSES
