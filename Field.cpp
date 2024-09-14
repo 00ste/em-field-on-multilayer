@@ -1,5 +1,6 @@
 #include "Field.h"
 #include <cerrno>
+#include <cmath>
 #include <iostream>
 
 Field::Field(
@@ -21,15 +22,16 @@ void Field::calculateEHFields(
     // Calculate the transmission matrix by combining all matrices from all media above the current one.
     Matrix2x2 transmissionMatrix = Matrix2x2(1, 0, 0, 1);
     for (size_t i = 0; i < mediumIndex; i++) {
-        transmissionMatrix *= propagationMatrix(interfaceZCoords[i], polarization, mediumIndex);
-        transmissionMatrix *= matchingMatrix(polarization, i);
+        transmissionMatrix.preMultiply(propagationMatrix(interfaceZCoords[i], mediumIndex));
+        transmissionMatrix.preMultiply(matchingMatrix(polarization, i));
     }
 
     // Combine the current transmission matrix with the propagation matrix in the current medium.
-    transmissionMatrix *= propagationMatrix(zp - interfaceZCoords[mediumIndex], polarization, mediumIndex);
+    transmissionMatrix.preMultiply(propagationMatrix(zp - interfaceZCoords[mediumIndex], mediumIndex));
 
+    // TODO: Finish this
     Matrix2x2 progressiveRegressiveElectricField = Matrix2x2(E1inc, 0, 0, 0);
-    progressiveRegressiveElectricField *= transmissionMatrix;
+    progressiveRegressiveElectricField.preMultiply(transmissionMatrix);
 
     std::cout << "E+: " << progressiveRegressiveElectricField.e11 << std::endl;
     std::cout << "E-: " << progressiveRegressiveElectricField.e21 << std::endl;
@@ -59,13 +61,6 @@ void Field::calculateSinCosTheta(double theta0) {
     }
 }
 
-double Field::transverseWaveNumber(double n, double cosTheta, Polarization pol) {
-    if (pol == Polarization::TM)
-        return n * cosTheta;
-    // pol == Polarization::TE
-    return n / cosTheta;
-}
-
 std::vector<double> sinTheta(std::vector<double> n, double theta_0) {
     std::vector<double> result = std::vector<double>();
     result.reserve(n.size());
@@ -82,13 +77,20 @@ double Field::waveNumber(size_t mediumIndex) {
     return 2 * PI * mediaRefractionIndexes[mediumIndex] / wavelength;
 }
 
-std::complex<float> Field::phaseThickness(size_t mediumIndex, double zDepth) {
-    float n = mediaRefractionIndexes[mediumIndex];
-    // TODO: Implement this (use cosTheta instead of std::sqrt(1 - std::pow(sinTheta, 2)))
-    return 0;
-}
-
 std::complex<float> Field::transmissionCoefficient(Polarization pol, size_t mediumIndex) {
     // TODO: Implement this
     return 0;
+}
+
+Matrix2x2 Field::propagationMatrix(int zDepth, size_t mediumIndex) {
+    std::complex<float> phaseThicknessValue = phaseThickness(
+        mediaRefractionIndexes[mediumIndex],
+        wavelength,
+        cosTheta[mediumIndex],
+        interfaceZCoords[mediumIndex]
+    );
+    return Matrix2x2(
+        std::exp(-I * phaseThicknessValue), 0,
+        0, std::exp(I * phaseThicknessValue)
+    );
 }

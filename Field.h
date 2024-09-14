@@ -7,6 +7,8 @@
 #include <vector>
 #include <cmath>
 
+#include "Matrix2x2.h"
+
 class Field {
 public:
     // HELPER CLASSES
@@ -107,15 +109,33 @@ private:
     */
     double waveNumber(size_t mediumIndex);
 
-    // TODO: Pick a better name, the term "phase thickness" doesn't seem to appear anywhere
-    // this just calculates the argument of the complex exponential inside the propagation matrix.
     /**
-     *  Calculates the phase thickness inside the given medium at the given depth.
-     *  @param mediumIndex The index of the medium.
+     *  Calculates the phase thinkness of a oblique-incident field through a medium.
+     *  @param refractionIndex The refraction index of the medium.
+     *  @param wavelength The wavelength of the wave.
+     *  @param cosTheta The cosine of the angle of incidence
      *  @param zDepth The depth from the top of the given medium.
      *  @return The phase thickness.
      */
-    std::complex<float> phaseThickness(size_t mediumIndex, double zDepth);
+    inline std::complex<float> phaseThickness(
+        std::complex<float> refractionIndex,
+        float wavelength,
+        float cosTheta,
+        float zDepth
+    ) {
+        return 2*PI * refractionIndex * zDepth * cosTheta / wavelength;
+    }
+
+
+
+    /**
+    *  Calculates the matching matrix between one medium and the previous one.
+    *  @param sinTheta The sines of the angles.
+    *  @param pol The polarization of the wave.
+    *  @param medium The index of .
+    *  @return the transmission coefficient.
+    */
+    Matrix2x2 matchingMatrix(Polarization pol, size_t mediumIndex);
 
     /**
     *  Calculates the transmission coefficient between one medium and the previous one.
@@ -132,17 +152,7 @@ private:
     *  @param medium The index of the medium.
     *  @return the transmission coefficient.
     */
-    Matrix2x2 propagationMatrix(int zDepth, Polarization pol, size_t mediumIndex);
-
-    /**
-    *  Calculates the matching matrix between one medium and the previous one.
-    *  @param sinTheta The sines of the angles.
-    *  @param pol The polarization of the wave.
-    *  @param medium The index of .
-    *  @return the transmission coefficient.
-    */
-    Matrix2x2 matchingMatrix(Polarization pol, size_t mediumIndex);
-
+    Matrix2x2 propagationMatrix(int zDepth, size_t mediumIndex);
 };
 
 #endif /* FIELDS_H */
