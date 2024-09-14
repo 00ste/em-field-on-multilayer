@@ -344,6 +344,7 @@ end
 end
 
 
+%% original.c++ done
 %% I, C++
 % funzione che calcola il numero d'onda trasversale del mezzo
 % in base alla polarizzazione dell'onda.

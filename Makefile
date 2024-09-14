@@ -5,7 +5,7 @@ CC = gcc
 CFLAGS = -Wall -g
 
 # Source files
-SRCS = Field.cpp tests/OneMaterial.cpp
+SRCS = Matrix2x2.cpp tests/MatrixOperations.cpp
 
 # Object files
 OBJS = $(SRCS:.c=.o)
