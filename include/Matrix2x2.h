@@ -1,3 +1,6 @@
+#ifndef MATRIX_2X2_H
+#define MATRIX_2X2_H
+
 #include <complex>
 
 /**
@@ -17,3 +20,5 @@ struct Matrix2x2 {
 
     Matrix2x2& postMultiply(const Matrix2x2& other);
 };
+
+#endif /* MATRIX_2X2_H */

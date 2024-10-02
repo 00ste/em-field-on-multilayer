@@ -1,4 +1,4 @@
-#include "Matrix2x2.h"
+#include "../include/Matrix2x2.h"
 
 Matrix2x2& Matrix2x2::preMultiply(const Matrix2x2& other) {
     Matrix2x2 old(this->e11, this->e12, this->e21, this->e22);
