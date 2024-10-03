@@ -65,21 +65,31 @@ public:
         try {
             std::string line;
 
-            // Read number of media
+            // Read z coordinate of each interface
+            inputData.numberOfMedia = 0;
             std::getline(inputFile, line);
-            std::cout << "Found line [" << line << "]" << std::endl;
-            inputData.numberOfMedia = std::stof(line);
-            inputData.mediaZInterfaces.reserve(inputData.numberOfMedia);
+            std::string token;
+            std::size_t pos = 0;
+            while ((pos = line.find(",")) != std::string::npos) {
+                token = line.substr(0, pos);
+                inputData.mediaZInterfaces.push_back(std::stof(token));
+                line.erase(0, pos + 1);
+                inputData.numberOfMedia += 1;
+            }
+            inputData.mediaZInterfaces.push_back(std::stof(line));
+            
+            // If there are n interfaces, there are n+1 media
+            inputData.numberOfMedia += 2;
+
             inputData.mediaEpsilon.reserve(inputData.numberOfMedia);
             inputData.mediaMu.reserve(inputData.numberOfMedia);
 
-            // Read interface z, epsilon and mu of each medium
-            for (size_t i = 0; i < inputData.numberOfMedia; i++) {
+            // Read epsilon and mu of each medium
+            for (std::size_t i = 0; i < inputData.numberOfMedia; i++) {
                 std::getline(inputFile, line);
-                std::string token;
-                std::vector<float> values = std::vector<float>();
-                values.reserve(5);
-                size_t pos = 0;
+                std::vector<float> values;
+                values.reserve(4);
+                pos = 0;
 
                 while ((pos = line.find(",")) != std::string::npos) {
                     token = line.substr(0, pos);
@@ -89,14 +99,13 @@ public:
                 values.push_back(std::stof(line));
 
                 // Assign values to the respective fields
-                inputData.mediaZInterfaces.push_back(values[0]);
-                inputData.mediaEpsilon.push_back(std::complex<float>(values[1], values[2]));
-                inputData.mediaMu.push_back(std::complex<float>(values[3], values[4]));
+                inputData.mediaEpsilon.push_back(std::complex<float>(values[0], values[1]));
+                inputData.mediaMu.push_back(std::complex<float>(values[2], values[3]));
             }
 
             // Read incident field amplitude
             std::getline(inputFile, line);
-            size_t pos = line.find(",");
+            pos = line.find(",");
 
             // if the amplitude is complex
             if (pos != std::string::npos)
@@ -115,6 +124,12 @@ public:
             // Read incident field wavelength
             std::getline(inputFile, line);
             inputData.wavelength = std::stof(line);
+
+            // Read wave polarization
+            std::getline(inputFile, line);
+            inputData.polarization = line == "TM" ? Polarization::TM : Polarization::TE;
+            if (line != "TM" && line != "TE")
+                std::cout << "Warning! " << line << " is not a valid polarization, TE is selected by default.";
 
             return true;
         }

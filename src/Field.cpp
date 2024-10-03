@@ -4,7 +4,7 @@
 #include <cmath>
 
 Field::Field(InputData inputData)
-    : polarization{inputData.polarization}, wavelength{inputData.wavelength}, E_T0{0, 0, 0, 0} {
+    : polarization{inputData.polarization}, wavelength{ inputData.wavelength }, E_T0{ 0, 0, 0, 0 } {
 
     numMedia = inputData.numberOfMedia;
     media.resize(numMedia);
