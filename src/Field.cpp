@@ -24,7 +24,7 @@ Field::Field(InputData inputData)
         media[i].refractionIndex =  std::sqrt(inputData.mediaMu[i] / inputData.mediaEpsilon[i]);
         media[i].waveImpedance = media[i].refractionIndex * ETA0;
         media[i].sinTheta = media[0].sinTheta * media[0].refractionIndex / media[i].refractionIndex;
-        media[i].cosTheta = std::sqrt(std::complex<float>(1, 0) - std::pow(media[0].sinTheta, 2));
+        media[i].cosTheta = std::sqrt(std::complex<float>(1, 0) - std::pow(media[i].sinTheta, 2));
         media[i].wavenumber = 2*PI * media[i].refractionIndex / inputData.wavelength;
     }
 
@@ -108,8 +108,8 @@ Field::Field(InputData inputData)
     else {
         E_T0.e11 = inputData.Einc;
     }
-    std::complex<float> temp = - media[numMedia-1].transmissionMatrix.e21 /
-        media[numMedia-1].transmissionMatrix.e22;
+    std::complex<float> temp = - media[numMedia-2].transmissionMatrix.e21 /
+        media[numMedia-2].transmissionMatrix.e22;
     E_T0.e21 = temp * E_T0.e11;
 }
 
