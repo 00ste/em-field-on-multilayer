@@ -53,13 +53,13 @@ struct MediumData {
         sinTheta{ 0 }, cosTheta{ 0 }, wavenumber{ 0 },
         transmissionMatrix{ Matrix2x2{ 0, 0, 0, 0 } } {}
 
-  float zBottom;
-  std::complex<float> refractionIndex;
-  std::complex<float> waveImpedance;
-  std::complex<float> sinTheta;
-  std::complex<float> cosTheta;
-  std::complex<float> wavenumber;
-  Matrix2x2 transmissionMatrix;
+    float zBottom;
+    std::complex<float> refractionIndex;
+    std::complex<float> waveImpedance;
+    std::complex<float> sinTheta;
+    std::complex<float> cosTheta;
+    std::complex<float> wavenumber;
+    Matrix2x2 transmissionMatrix;
 };
 
 #endif /* DATA_H */

@@ -57,8 +57,8 @@ Field::Field(InputData inputData)
 
     std::complex<float> phaseThickness = 2*PI * media[0].wavenumber * media[0].cosTheta * media[0].zBottom;
     Matrix2x2 propagationMatrix = Matrix2x2(
-        std::exp(-std::complex(0.f, 1.f) * phaseThickness), 0,
-        0, std::exp(std::complex(0.f, 1.f) * phaseThickness)
+        std::exp(-I * phaseThickness), 0,
+        0, std::exp(I * phaseThickness)
     );
 
     media[0].transmissionMatrix = propagationMatrix.preMultiply(matchingMatrix);
@@ -89,8 +89,8 @@ Field::Field(InputData inputData)
 
         std::complex phaseThickness = media[i].wavenumber * media[i].cosTheta * (media[i].zBottom - media[i-1].zBottom);
         propagationMatrix = Matrix2x2(
-            std::exp(-std::complex(0.f, 1.f) * phaseThickness), 0,
-            0, std::exp(std::complex(0.f, 1.f) * phaseThickness)
+            std::exp(-I * phaseThickness), 0,
+            0, std::exp(I * phaseThickness)
         );
 
         // Combine matching and propagation matrices to the transmission matrix of the previous medium
@@ -113,28 +113,67 @@ Field::Field(InputData inputData)
     E_T0.e21 = temp * E_T0.e11;
 }
 
-void Field::calculateEHFields(
-    float incidenceAngle,
-    Polarization polarization,
-    float wavelength,
-    std::complex<float> E1inc,
-    float xp,
-    float zp
-) {
-    /*
+void Field::calculateEHFields(float xp, float zp) {
     // Find which medium contains the point where the fields should be calculated.
-    size_t mediumIndex = findMedium(zp);
+    std::size_t mediumIndex = findMedium(zp);
 
-    // Combine the current transmission matrix with the propagation matrix in the current medium.
-    media[mediumIndex].transmissionMatrix.preMultiply(propagationMatrix(zp - media[mediumIndex].zBottom, mediumIndex));
+    // Calculate forward and backward transverse components of E at zp
+    Matrix2x2 E_Tzp = E_T0;
+    if (mediumIndex > 0)
+        E_Tzp = E_Tzp
+            .preMultiply(media[mediumIndex-1].transmissionMatrix)
+            .preMultiply(propagationMatrix(mediumIndex, zp));
+    else
+        E_Tzp = E_Tzp
+            .preMultiply(propagationMatrix(mediumIndex, zp));
+        
+    // Calculate the full forward and backward components of E at zp
+    MediumData* medium = &media[mediumIndex];
+    std::complex<float> E_zp_forward[3];
+    std::complex<float> E_zp_backward[3];
+    if (polarization == TM) {
+        E_zp_forward[0] = E_Tzp.e11;
+        E_zp_forward[1] = 0;
+        E_zp_forward[2] = -E_Tzp.e11 * (medium->sinTheta / medium->cosTheta);
 
-    // TODO: Finish this
-    Matrix2x2 progressiveRegressiveElectricField = Matrix2x2(E1inc, 0, 0, 0);
-    progressiveRegressiveElectricField.preMultiply(transmissionMatrix);
+        E_zp_backward[0] = E_Tzp.e21;
+        E_zp_backward[1] = 0;
+        E_zp_backward[2] = E_Tzp.e21 * (medium->sinTheta / medium->cosTheta);
+    }
+    else {
+        E_zp_forward[0] = 0;
+        E_zp_forward[1] = E_Tzp.e11;
+        E_zp_forward[2] = 0;
 
-    std::cout << "E+: " << progressiveRegressiveElectricField.e11 << std::endl;
-    std::cout << "E-: " << progressiveRegressiveElectricField.e21 << std::endl;
-    */
+        E_zp_backward[0] = 0;
+        E_zp_backward[1] = E_Tzp.e21;
+        E_zp_backward[2] = 0;
+    }
+
+    // Calculate total E and H fields at zp
+    E[0] = E_zp_forward[0] + E_zp_backward[0];
+    E[1] = E_zp_forward[1] + E_zp_backward[1];
+    E[2] = E_zp_forward[2] + E_zp_backward[2];
+
+    if (polarization == TM) {
+        H[0] = 0;
+        H[1] =
+            ((E_zp_forward[0] * medium->cosTheta - E_zp_forward[2] * medium->sinTheta) -
+            (E_zp_backward[0] * medium->cosTheta + E_zp_backward[2] * medium->sinTheta))
+            / medium->waveImpedance;
+        H[2] = 0;
+    }
+    else {
+        H[0] = ((E_zp_backward[1] - E_zp_forward[1]) * medium->cosTheta) / medium->waveImpedance;
+        H[1] = 0;
+        H[2] = ((E_zp_backward[1] - E_zp_forward[1]) * medium->sinTheta) / medium->waveImpedance;
+    }
+
+    // Add horizontal phase to get the value at xp
+    for (std::size_t i = 0; i < 3; i++) {
+        E[i] *= exp(-I * medium->wavenumber * medium->sinTheta * xp);
+        H[i] *= exp(-I * medium->wavenumber * medium->sinTheta * xp);
+    }    
 }
 
 std::size_t Field::findMedium(float zp) {
@@ -148,4 +187,17 @@ std::size_t Field::findMedium(float zp) {
 
     // unreachable
     return numMedia;
+}
+
+Matrix2x2 Field::propagationMatrix(std::size_t mediumIndex, float zp) {
+    std::complex<float> phaseThickness = media[mediumIndex].wavenumber * media[mediumIndex].cosTheta;
+    if (mediumIndex == 0)
+        phaseThickness *= zp;
+    else
+        phaseThickness *= zp - media[mediumIndex-1].zBottom;
+
+    return Matrix2x2(
+        std::exp(-I * phaseThickness), 0,
+        0, std::exp(I * phaseThickness)
+    );
 }
