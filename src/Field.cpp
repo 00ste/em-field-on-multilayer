@@ -177,16 +177,10 @@ void Field::calculateEHFields(float xp, float zp) {
 }
 
 std::size_t Field::findMedium(float zp) {
-    if (zp <= media[0].zBottom) return 0;
-    if (zp > media[numMedia - 1].zBottom) return numMedia;
-
-    for (std::size_t i = 0; i < numMedia; i++) {
-        if (zp > media[i].zBottom && zp <= media[i+1].zBottom);
-            return i+1;
+    for (std::size_t i = 0; i < numMedia-1; i++) {
+        if (zp >= media[i].zBottom) return i;
     }
-
-    // unreachable
-    return numMedia;
+    return numMedia-1;
 }
 
 Matrix2x2 Field::propagationMatrix(std::size_t mediumIndex, float zp) {
