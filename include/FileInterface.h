@@ -140,6 +140,45 @@ public:
             return false;
         }
     }
+
+    static bool readPoints(std::vector<Point>& data, std::string inputFilePath) {
+        std::ifstream inputFile;
+        inputFile.open(inputFilePath, std::ios::in);
+
+        if (!inputFile.is_open()) {
+            std::cerr << "Could not open the file" << std::endl;
+            return false;
+        }
+
+        std::size_t lineNumber = 0;
+        try {
+            std::string line;
+            std::size_t pos;
+
+            while (std::getline(inputFile, line)) {
+                lineNumber++;
+                pos = line.find(",");
+
+                if (pos == std::string::npos) {
+                    std::cerr << "No comma found at line " << lineNumber << std::endl;
+                    return false;
+                }
+
+                data.push_back(Point{
+                    std::stof(line.substr(0, pos)),
+                    std::stof(line.substr(pos+1, std::string::npos))
+                });
+            }
+        }
+        catch (std::exception e) {
+            inputFile.close();
+            std::cerr << "An error occurred while reading input points file at line " << lineNumber << std::endl;
+            std::cerr << e.what() << std::endl;
+            return false;
+        }
+
+        return true;
+    }
 };
 
 #endif /* FILE_INTERFACE_H */

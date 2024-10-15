@@ -62,4 +62,12 @@ struct MediumData {
     Matrix2x2 transmissionMatrix;
 };
 
+/**
+ *  The x, z coordinates of a point where the EM fields can be calculated.
+ */
+struct Point {
+    float x;
+    float z;
+};
+
 #endif /* DATA_H */
