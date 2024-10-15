@@ -12,8 +12,8 @@ Field::Field(InputData inputData)
     // Calculate medium data for the 0th medium
     MediumData* medium = &media[0];
     medium->zBottom = inputData.mediaZInterfaces[0];
-    medium->refractionIndex =  std::sqrt(inputData.mediaMu[0] / inputData.mediaEpsilon[0]);
-    medium->waveImpedance = medium->refractionIndex * ETA0;
+    medium->refractionIndex =  std::sqrt(inputData.mediaMu[0] * inputData.mediaEpsilon[0]);
+    medium->waveImpedance = ETA0 * sqrt(inputData.mediaMu[0] / inputData.mediaEpsilon[0]);
     medium->sinTheta = std::sin(inputData.angleOfIncidence);
     medium->cosTheta = std::cos(inputData.angleOfIncidence);
     medium->wavenumber = 2*PI * medium->refractionIndex / inputData.wavelength;
