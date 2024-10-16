@@ -23,22 +23,25 @@ public:
             return false;
         }
 
+        std::size_t precision = 5;
+        std::size_t width = 12;
+
         try {
             for (auto line : data) {
-                outputFile << std::setprecision(5) << std::setw(8) << line.xp;
-                outputFile << std::setprecision(5) << std::setw(8) << line.zp;
-                outputFile << std::setprecision(5) << std::setw(8) << line.Ex.real();
-                outputFile << std::setprecision(5) << std::setw(8) << line.Ex.imag();
-                outputFile << std::setprecision(5) << std::setw(8) << line.Ey.real();
-                outputFile << std::setprecision(5) << std::setw(8) << line.Ey.imag();
-                outputFile << std::setprecision(5) << std::setw(8) << line.Ez.real();
-                outputFile << std::setprecision(5) << std::setw(8) << line.Ez.imag();
-                outputFile << std::setprecision(5) << std::setw(8) << line.Hx.real();
-                outputFile << std::setprecision(5) << std::setw(8) << line.Hx.imag();
-                outputFile << std::setprecision(5) << std::setw(8) << line.Hy.real();
-                outputFile << std::setprecision(5) << std::setw(8) << line.Hy.imag();
-                outputFile << std::setprecision(5) << std::setw(8) << line.Hz.real();
-                outputFile << std::setprecision(5) << std::setw(8) << line.Hz.imag();
+                outputFile << std::setprecision(precision) << std::setw(width) << line.xp << ";";
+                outputFile << std::setprecision(precision) << std::setw(width) << line.zp << ";";
+                outputFile << std::setprecision(precision) << std::setw(width) << line.Ex.real() << ";";
+                outputFile << std::setprecision(precision) << std::setw(width) << line.Ex.imag() << ";";
+                outputFile << std::setprecision(precision) << std::setw(width) << line.Ey.real() << ";";
+                outputFile << std::setprecision(precision) << std::setw(width) << line.Ey.imag() << ";";
+                outputFile << std::setprecision(precision) << std::setw(width) << line.Ez.real() << ";";
+                outputFile << std::setprecision(precision) << std::setw(width) << line.Ez.imag() << ";";
+                outputFile << std::setprecision(precision) << std::setw(width) << line.Hx.real() << ";";
+                outputFile << std::setprecision(precision) << std::setw(width) << line.Hx.imag() << ";";
+                outputFile << std::setprecision(precision) << std::setw(width) << line.Hy.real() << ";";
+                outputFile << std::setprecision(precision) << std::setw(width) << line.Hy.imag() << ";";
+                outputFile << std::setprecision(precision) << std::setw(width) << line.Hz.real() << ";";
+                outputFile << std::setprecision(precision) << std::setw(width) << line.Hz.imag() << ";";
                 outputFile << std::endl;
             }
 
