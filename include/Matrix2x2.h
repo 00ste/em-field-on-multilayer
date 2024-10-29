@@ -21,4 +21,12 @@ struct Matrix2x2 {
     Matrix2x2& postMultiply(const Matrix2x2& other);
 };
 
+struct Vector2 {
+    std::complex<float> e1;
+    std::complex<float> e2;
+
+    Vector2(std::complex<float> e1_, std::complex<float> e2_) : e1(e1_), e2(e2_) {}
+    Vector2& preMultiply(const Matrix2x2& other);
+};
+
 #endif /* MATRIX_2X2_H */

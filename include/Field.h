@@ -28,9 +28,10 @@ public:
     std::vector<MediumData> media;
 
     // Information regarding the incident field
+    float startZ;
     float wavelength;
     Polarization polarization;
-    Matrix2x2 E_T0;
+    Vector2 E_T0;
 
     Field(InputData inputData);
 

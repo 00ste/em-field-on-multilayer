@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <cstring>
 
 #include "../include/Data.h"
 #include "../include/FileInterface.h"
@@ -23,6 +24,7 @@ int main(int argc, char* argv[]) {
     // Get data from command line args
     FileInterface::readData(data, argv[1]);
     FileInterface::readPoints(points, argv[2]);
+    bool polar = argc >= 5 && std::strcmp(argv[4], "-p") == 0;
 
     output.reserve(points.size());
 
@@ -48,7 +50,7 @@ int main(int argc, char* argv[]) {
     }
 
     // Write results into the output file
-    FileInterface::writeData(output, argv[3]);
+    FileInterface::writeData(output, argv[3], polar);
 
     return EXIT_SUCCESS;
 }

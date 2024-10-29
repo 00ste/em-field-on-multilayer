@@ -14,7 +14,7 @@
 
 class FileInterface {
 public:
-    static bool writeData(const std::vector<OutputDataLine>& data, std::string outputFilePath) {
+    static bool writeData(const std::vector<OutputDataLine>& data, std::string outputFilePath, bool polar) {
         std::ofstream outputFile;
         outputFile.open(outputFilePath);
 
@@ -27,22 +27,43 @@ public:
         std::size_t width = 12;
 
         try {
-            for (auto line : data) {
-                outputFile << std::setprecision(precision) << std::setw(width) << line.xp << ";";
-                outputFile << std::setprecision(precision) << std::setw(width) << line.zp << ";";
-                outputFile << std::setprecision(precision) << std::setw(width) << line.Ex.real() << ";";
-                outputFile << std::setprecision(precision) << std::setw(width) << line.Ex.imag() << ";";
-                outputFile << std::setprecision(precision) << std::setw(width) << line.Ey.real() << ";";
-                outputFile << std::setprecision(precision) << std::setw(width) << line.Ey.imag() << ";";
-                outputFile << std::setprecision(precision) << std::setw(width) << line.Ez.real() << ";";
-                outputFile << std::setprecision(precision) << std::setw(width) << line.Ez.imag() << ";";
-                outputFile << std::setprecision(precision) << std::setw(width) << line.Hx.real() << ";";
-                outputFile << std::setprecision(precision) << std::setw(width) << line.Hx.imag() << ";";
-                outputFile << std::setprecision(precision) << std::setw(width) << line.Hy.real() << ";";
-                outputFile << std::setprecision(precision) << std::setw(width) << line.Hy.imag() << ";";
-                outputFile << std::setprecision(precision) << std::setw(width) << line.Hz.real() << ";";
-                outputFile << std::setprecision(precision) << std::setw(width) << line.Hz.imag() << ";";
-                outputFile << std::endl;
+            if (polar) {
+                for (auto line : data) {
+                    outputFile << std::setprecision(precision) << std::setw(width) << line.xp << ";";
+                    outputFile << std::setprecision(precision) << std::setw(width) << line.zp << ";";
+                    outputFile << std::setprecision(precision) << std::setw(width) << std::abs(line.Ex) << ";";
+                    outputFile << std::setprecision(precision) << std::setw(width) << std::arg(line.Ex) << ";";
+                    outputFile << std::setprecision(precision) << std::setw(width) << std::abs(line.Ey) << ";";
+                    outputFile << std::setprecision(precision) << std::setw(width) << std::arg(line.Ey) << ";";
+                    outputFile << std::setprecision(precision) << std::setw(width) << std::abs(line.Ez) << ";";
+                    outputFile << std::setprecision(precision) << std::setw(width) << std::arg(line.Ez) << ";";
+                    outputFile << std::setprecision(precision) << std::setw(width) << std::abs(line.Hx) << ";";
+                    outputFile << std::setprecision(precision) << std::setw(width) << std::arg(line.Hx) << ";";
+                    outputFile << std::setprecision(precision) << std::setw(width) << std::abs(line.Hy) << ";";
+                    outputFile << std::setprecision(precision) << std::setw(width) << std::arg(line.Hy) << ";";
+                    outputFile << std::setprecision(precision) << std::setw(width) << std::abs(line.Hz) << ";";
+                    outputFile << std::setprecision(precision) << std::setw(width) << std::arg(line.Hz) << ";";
+                    outputFile << std::endl;
+                }
+            }
+            else {
+                for (auto line : data) {
+                    outputFile << std::setprecision(precision) << std::setw(width) << line.xp << ";";
+                    outputFile << std::setprecision(precision) << std::setw(width) << line.zp << ";";
+                    outputFile << std::setprecision(precision) << std::setw(width) << line.Ex.real() << ";";
+                    outputFile << std::setprecision(precision) << std::setw(width) << line.Ex.imag() << ";";
+                    outputFile << std::setprecision(precision) << std::setw(width) << line.Ey.real() << ";";
+                    outputFile << std::setprecision(precision) << std::setw(width) << line.Ey.imag() << ";";
+                    outputFile << std::setprecision(precision) << std::setw(width) << line.Ez.real() << ";";
+                    outputFile << std::setprecision(precision) << std::setw(width) << line.Ez.imag() << ";";
+                    outputFile << std::setprecision(precision) << std::setw(width) << line.Hx.real() << ";";
+                    outputFile << std::setprecision(precision) << std::setw(width) << line.Hx.imag() << ";";
+                    outputFile << std::setprecision(precision) << std::setw(width) << line.Hy.real() << ";";
+                    outputFile << std::setprecision(precision) << std::setw(width) << line.Hy.imag() << ";";
+                    outputFile << std::setprecision(precision) << std::setw(width) << line.Hz.real() << ";";
+                    outputFile << std::setprecision(precision) << std::setw(width) << line.Hz.imag() << ";";
+                    outputFile << std::endl;
+                }
             }
 
             outputFile.close();
@@ -65,14 +86,21 @@ public:
             return false;
         }
 
+        std::string line;
         try {
-            std::string line;
-
-            // Read z coordinate of each interface
+            // Read z coordinate of each interface and start z
             inputData.numberOfMedia = 0;
             std::getline(inputFile, line);
             std::string token;
             std::size_t pos = 0;
+            
+            // The first number in the first line is the start z
+            pos = line.find(",");
+            inputData.startZ = std::stof(line.substr(0, pos));
+            line.erase(0, pos + 1);
+
+            // The following numbers in the first line are the z coords of each interface
+            // Also count the number of interfaces
             while ((pos = line.find(",")) != std::string::npos) {
                 token = line.substr(0, pos);
                 inputData.mediaZInterfaces.push_back(std::stof(token));
@@ -81,7 +109,8 @@ public:
             }
             inputData.mediaZInterfaces.push_back(std::stof(line));
             
-            // If there are n interfaces, there are n+1 media
+            // +1 to count the last interface
+            // +1 because the number of media is one more than the number of interfaces
             inputData.numberOfMedia += 2;
 
             inputData.mediaEpsilon.reserve(inputData.numberOfMedia);
@@ -138,7 +167,8 @@ public:
         }
         catch (std::exception e) {
             inputFile.close();
-            std::cerr << "An error occurred while parsing data file" << std::endl;
+            std::cerr << "An error occurred while parsing data file on the following line:" << std::endl;
+            std::cerr << line << std::endl;
             std::cerr << e.what() << std::endl;
             return false;
         }

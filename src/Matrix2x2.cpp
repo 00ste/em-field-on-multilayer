@@ -17,3 +17,10 @@ Matrix2x2& Matrix2x2::postMultiply(const Matrix2x2& other) {
     this->e22 = old.e21 * other.e12 + old.e22 * other.e22;
     return *this;
 }
+
+Vector2& Vector2::preMultiply(const Matrix2x2& other) {
+    Vector2 old(this->e1, this->e2);
+    this->e1 = old.e1 * other.e11 + old.e2 * other.e12;
+    this->e2 = old.e1 * other.e21 + old.e2 * other.e22;
+    return *this;
+}

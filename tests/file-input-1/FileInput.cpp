@@ -9,7 +9,7 @@ int main(int argc, char* argv[]) {
         std::cerr << "An error occurred!" << std::endl;
         return EXIT_FAILURE;
     }
-
+    std::cout << "Starting z: " << data.startZ << std::endl;
     std::cout << "Found " << data.numberOfMedia << " media with parameters:" << std::endl;
     for (std::size_t i = 0; i < data.numberOfMedia; i++) {
         std::cout << "z_" << i << " = " << data.mediaZInterfaces[i] << ", ";

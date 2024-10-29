@@ -1,5 +1,5 @@
-CPP_SOURCES = FileInput.cpp $(wildcard ../../src/*)
-CPP_HEADERS = $(wildcard ../../include/*)
+CPP_SOURCES = FileInput.cpp
+CPP_HEADERS = ../../include/FileInterface.h ../../include/Data.h
 
 all: fileinput-1
 
