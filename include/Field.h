@@ -18,6 +18,7 @@ public:
     const float MI0 = 4*PI*0.0000001;
     const float ETA0 = C0 * MI0;
     const std::complex<float> I = std::complex(0.f, 1.f);
+    const std::complex<float> ONE = std::complex(1.f, 0.f);
 
     // Output variables
     std::complex<float> E[3];

@@ -22,10 +22,10 @@ Field::Field(InputData inputData)
     // Calculate medium data for all other media
     for (std::size_t i = 1; i < numMedia; i++) {
         media[i].zBottom = inputData.mediaZInterfaces[i];
-        media[i].refractionIndex =  std::sqrt(inputData.mediaMu[i] / inputData.mediaEpsilon[i]);
-        media[i].waveImpedance = media[i].refractionIndex * ETA0;
+        medium->refractionIndex =  std::sqrt(inputData.mediaMu[i] * inputData.mediaEpsilon[i]);
+        medium->waveImpedance = ETA0 * sqrt(inputData.mediaMu[i] / inputData.mediaEpsilon[i]);
         media[i].sinTheta = media[0].sinTheta * media[0].refractionIndex / media[i].refractionIndex;
-        media[i].cosTheta = std::sqrt(std::complex<float>(1, 0) - std::pow(media[i].sinTheta, 2));
+        media[i].cosTheta = std::sqrt(ONE - std::pow(media[i].sinTheta, 2));
         media[i].wavenumber = 2*PI * media[i].refractionIndex / inputData.wavelength;
     }
 
@@ -48,12 +48,12 @@ Field::Field(InputData inputData)
         (refractionIndexNext - refractionIndexCurr) /
         (refractionIndexNext + refractionIndexCurr);
 
-    std::complex<float> transmissionCoefficient = std::complex(1.f, 0.f) - reflectionCoefficient;
+    std::complex<float> transmissionCoefficient = ONE - reflectionCoefficient;
 
     // Calculate matching and propagation matrices
     Matrix2x2 matchingMatrix = Matrix2x2(
-        std::complex(1.f, 0.f) / transmissionCoefficient, reflectionCoefficient / transmissionCoefficient,
-        reflectionCoefficient / transmissionCoefficient, std::complex(1.f, 0.f) / transmissionCoefficient
+        ONE / transmissionCoefficient, reflectionCoefficient / transmissionCoefficient,
+        reflectionCoefficient / transmissionCoefficient, ONE / transmissionCoefficient
     );
 
     std::complex<float> phaseThickness = 2*PI * media[0].wavenumber * media[0].cosTheta * (media[0].zBottom - startZ);
@@ -80,12 +80,12 @@ Field::Field(InputData inputData)
             (refractionIndexNext - refractionIndexCurr) /
             (refractionIndexNext + refractionIndexCurr);
 
-        transmissionCoefficient = std::complex(1.f, 0.f) - reflectionCoefficient;
+        transmissionCoefficient = ONE - reflectionCoefficient;
 
         // Calculate matching and propagation matrices
         matchingMatrix = Matrix2x2(
-            std::complex(1.f, 0.f) / transmissionCoefficient, reflectionCoefficient / transmissionCoefficient,
-            reflectionCoefficient / transmissionCoefficient, std::complex(1.f, 0.f) / transmissionCoefficient
+            ONE / transmissionCoefficient, reflectionCoefficient / transmissionCoefficient,
+            reflectionCoefficient / transmissionCoefficient, ONE / transmissionCoefficient
         );
 
         std::complex phaseThickness = media[i].wavenumber * media[i].cosTheta * (media[i].zBottom - media[i-1].zBottom);
