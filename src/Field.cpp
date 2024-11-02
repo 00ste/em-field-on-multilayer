@@ -3,6 +3,8 @@
 #include <cerrno>
 #include <cmath>
 
+#define DEBUG
+
 Field::Field(InputData inputData)
     : polarization{inputData.polarization}, wavelength{ inputData.wavelength },
     E_T0{ 0, 0 }, startZ{ inputData.startZ } {
@@ -22,12 +24,24 @@ Field::Field(InputData inputData)
     // Calculate medium data for all other media
     for (std::size_t i = 1; i < numMedia; i++) {
         media[i].zBottom = inputData.mediaZInterfaces[i];
-        medium->refractionIndex =  std::sqrt(inputData.mediaMu[i] * inputData.mediaEpsilon[i]);
-        medium->waveImpedance = ETA0 * sqrt(inputData.mediaMu[i] / inputData.mediaEpsilon[i]);
+        media[i].refractionIndex =  std::sqrt(inputData.mediaMu[i] * inputData.mediaEpsilon[i]);
+        media[i].waveImpedance = ETA0 * sqrt(inputData.mediaMu[i] / inputData.mediaEpsilon[i]);
         media[i].sinTheta = media[0].sinTheta * media[0].refractionIndex / media[i].refractionIndex;
         media[i].cosTheta = std::sqrt(ONE - std::pow(media[i].sinTheta, 2));
         media[i].wavenumber = 2*PI * media[i].refractionIndex / inputData.wavelength;
     }
+
+#ifdef DEBUG
+    for (std::size_t i = 0; i < numMedia; i++) {
+        std::cout << "Listing parameters for media " << i << std::endl;
+        std::cout << "- zBottom = " << media[i].zBottom << std::endl;
+        std::cout << "- refractionIndex = " << media[i].refractionIndex << std::endl;
+        std::cout << "- waveImpedance = " << media[i].waveImpedance << std::endl;
+        std::cout << "- sinTheta = " << media[i].sinTheta << std::endl;
+        std::cout << "- cosTheta = " << media[i].cosTheta << std::endl;
+        std::cout << "- wavenumber = " << media[i].wavenumber << std::endl;
+    }
+#endif /* DEBUG */
 
     // Calculate transmission matrix for the 0th medium
     std::complex<float> refractionIndexCurr;
@@ -48,7 +62,7 @@ Field::Field(InputData inputData)
         (refractionIndexNext - refractionIndexCurr) /
         (refractionIndexNext + refractionIndexCurr);
 
-    std::complex<float> transmissionCoefficient = ONE - reflectionCoefficient;
+    std::complex<float> transmissionCoefficient = ONE + reflectionCoefficient;
 
     // Calculate matching and propagation matrices
     Matrix2x2 matchingMatrix = Matrix2x2(
@@ -62,17 +76,29 @@ Field::Field(InputData inputData)
         0, std::exp(I * phaseThickness)
     );
 
-    media[0].transmissionMatrix = propagationMatrix.preMultiply(matchingMatrix);
+    media[0].transmissionMatrix = Matrix2x2(propagationMatrix);
+    media[0].transmissionMatrix.preMultiply(matchingMatrix);
+
+#ifdef DEBUG
+    std::cout << "Listing matrix data for medium 0" << std::endl;
+    std::cout << "- refractionIndexCurr = " << refractionIndexCurr << std::endl;
+    std::cout << "- refractionIndexNext = " << refractionIndexNext << std::endl;
+    std::cout << "- reflectionCoefficient = " << reflectionCoefficient << std::endl;    
+    std::cout << "- transmissionCoefficient = " << transmissionCoefficient << std::endl;
+    std::cout << "- matchingMatrix = " << matchingMatrix.e11 << ", " << matchingMatrix.e12 << "; " << matchingMatrix.e21 << ", " << matchingMatrix.e22 << std::endl;
+    std::cout << "- propagationMatrix = " << propagationMatrix.e11 << ", " << propagationMatrix.e12 << "; " << propagationMatrix.e21 << ", " << propagationMatrix.e22 << std::endl;
+    std::cout << "- transmissionMatrix = " << media[0].transmissionMatrix.e11 << ", " << media[0].transmissionMatrix.e12 << "; " << media[0].transmissionMatrix.e21 << ", " << media[0].transmissionMatrix.e22 << std::endl;
+#endif /* DEBUG */
 
     // Calculate the transmission matrices for all other media
     for (std::size_t i = 1; i < numMedia-1; i++) {
         // Calculate transverse refraction index of the current and next medium
         refractionIndexCurr = refractionIndexNext;
         if (polarization == TM) {
-            refractionIndexNext = media[i].refractionIndex / media[i].cosTheta;
+            refractionIndexNext = media[i+1].refractionIndex / media[i+1].cosTheta;
         }
         else {
-            refractionIndexNext = media[i].refractionIndex * media[i].cosTheta;
+            refractionIndexNext = media[i+1].refractionIndex * media[i+1].cosTheta;
         }
 
         // Calculate reflection and transmission fresnel coefficients
@@ -80,7 +106,7 @@ Field::Field(InputData inputData)
             (refractionIndexNext - refractionIndexCurr) /
             (refractionIndexNext + refractionIndexCurr);
 
-        transmissionCoefficient = ONE - reflectionCoefficient;
+        transmissionCoefficient = ONE + reflectionCoefficient;
 
         // Calculate matching and propagation matrices
         matchingMatrix = Matrix2x2(
@@ -95,9 +121,28 @@ Field::Field(InputData inputData)
         );
 
         // Combine matching and propagation matrices to the transmission matrix of the previous medium
-        media[i].transmissionMatrix = media[i-1].transmissionMatrix
-            .preMultiply(propagationMatrix)
-            .preMultiply(matchingMatrix);
+        /*
+        media[i].transmissionMatrix = Matrix2x2(media[i-1].transmissionMatrix);
+        std::cout << "--Transmission matrix now :" << media[i].transmissionMatrix.e11 << ", " << media[i].transmissionMatrix.e12 << "; " << media[i].transmissionMatrix.e21 << ", " << media[i].transmissionMatrix.e22 << std::endl;
+        media[i].transmissionMatrix.preMultiply(matchingMatrix);
+        std::cout << "--Transmission matrix now :" << media[i].transmissionMatrix.e11 << ", " << media[i].transmissionMatrix.e12 << "; " << media[i].transmissionMatrix.e21 << ", " << media[i].transmissionMatrix.e22 << std::endl;
+        media[i].transmissionMatrix.preMultiply(propagationMatrix);
+        */
+        
+        media[i].transmissionMatrix = Matrix2x2(media[i-1].transmissionMatrix);
+        media[i].transmissionMatrix.preMultiply(propagationMatrix);
+        media[i].transmissionMatrix.preMultiply(matchingMatrix);        
+
+#ifdef DEBUG
+        std::cout << "Listing matrix data for medium " << i << std::endl;
+        std::cout << "- refractionIndexCurr = " << refractionIndexCurr << std::endl;
+        std::cout << "- refractionIndexNext = " << refractionIndexNext << std::endl;
+        std::cout << "- reflectionCoefficient = " << reflectionCoefficient << std::endl;
+        std::cout << "- transmissionCoefficient = " << transmissionCoefficient << std::endl;
+        std::cout << "- matchingMatrix = " << matchingMatrix.e11 << ", " << matchingMatrix.e12 << "; " << matchingMatrix.e21 << ", " << matchingMatrix.e22 << std::endl;
+        std::cout << "- propagationMatrix = " << propagationMatrix.e11 << ", " << propagationMatrix.e12 << "; " << propagationMatrix.e21 << ", " << propagationMatrix.e22 << std::endl;
+        std::cout << "- transmissionMatrix = " << media[i].transmissionMatrix.e11 << ", " << media[i].transmissionMatrix.e12 << "; " << media[i].transmissionMatrix.e21 << ", " << media[i].transmissionMatrix.e22 << std::endl;
+#endif /* DEBUG */
     }
 
     // Calculate the forward and backward components of E at z=0
@@ -119,15 +164,15 @@ void Field::calculateEHFields(float xp, float zp) {
     std::size_t mediumIndex = findMedium(zp);
 
     // Calculate forward and backward transverse components of E at zp
-    Vector2 E_Tzp = E_T0;
-    if (mediumIndex > 0)
-        E_Tzp = E_Tzp
-            .preMultiply(media[mediumIndex-1].transmissionMatrix)
-            .preMultiply(propagationMatrix(mediumIndex, zp));
-    else
-        E_Tzp = E_Tzp
-            .preMultiply(propagationMatrix(mediumIndex, zp));
-        
+    Vector2 E_Tzp = Vector2(E_T0);
+    if (mediumIndex > 0) {
+        E_Tzp.preMultiply(media[mediumIndex-1].transmissionMatrix);
+        E_Tzp.preMultiply(propagationMatrix(mediumIndex, zp));
+        }
+    else {
+        E_Tzp.preMultiply(propagationMatrix(mediumIndex, zp));
+    }
+
     // Calculate the full forward and backward components of E at zp
     MediumData* medium = &media[mediumIndex];
     std::complex<float> E_zp_forward[3];
