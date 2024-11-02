@@ -13,24 +13,24 @@
 class Field {
 public:
     // CONSTANTS
-    const float C0 = 299792458.0;
-    const float PI = M_PI;
-    const float MI0 = 4*PI*0.0000001;
-    const float ETA0 = C0 * MI0;
-    const std::complex<float> I = std::complex(0.f, 1.f);
-    const std::complex<float> ONE = std::complex(1.f, 0.f);
+    const double C0 = 299792458.0;
+    const double PI = M_PI;
+    const double MI0 = 4*PI*0.0000001;
+    const double ETA0 = C0 * MI0;
+    const std::complex<double> I = std::complex(0.f, 1.f);
+    const std::complex<double> ONE = std::complex(1.f, 0.f);
 
     // Output variables
-    std::complex<float> E[3];
-    std::complex<float> H[3];
+    std::complex<double> E[3];
+    std::complex<double> H[3];
 
     // Information regarding the media
     std::size_t numMedia;
     std::vector<MediumData> media;
 
     // Information regarding the incident field
-    float startZ;
-    float wavelength;
+    double startZ;
+    double wavelength;
     Polarization polarization;
     Vector2 E_T0;
 
@@ -43,8 +43,8 @@ public:
      *  @param zp The z coordinate of the point where the fields should be calculated.
      */
     void calculateEHFields(
-        float xp,
-        float zp
+        double xp,
+        double zp
     );
 
 private:
@@ -54,7 +54,7 @@ private:
      *  @param zp The z coordinate of the point that should be contained in the medium.
      *  @return The index of the medium.
      */
-    std::size_t findMedium(float zp);
+    std::size_t findMedium(double zp);
 
     /**
      *  Calculates the propagation matrix inside a medium. The method does not check if zp is outside the medium.
@@ -62,7 +62,7 @@ private:
      *  @param zp The z coordinate relative to the medium's top.
      *  @return The propagation matrix
      */
-    Matrix2x2 propagationMatrix(std::size_t mediumIndex, float zp);
+    Matrix2x2 propagationMatrix(std::size_t mediumIndex, double zp);
 };
 
 #endif /* FIELDS_H */

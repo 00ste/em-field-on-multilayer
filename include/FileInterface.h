@@ -119,7 +119,7 @@ public:
             // Read epsilon and mu of each medium
             for (std::size_t i = 0; i < inputData.numberOfMedia; i++) {
                 std::getline(inputFile, line);
-                std::vector<float> values;
+                std::vector<double> values;
                 values.reserve(4);
                 pos = 0;
 
@@ -131,8 +131,8 @@ public:
                 values.push_back(std::stof(line));
 
                 // Assign values to the respective fields
-                inputData.mediaEpsilon.push_back(std::complex<float>(values[0], values[1]));
-                inputData.mediaMu.push_back(std::complex<float>(values[2], values[3]));
+                inputData.mediaEpsilon.push_back(std::complex<double>(values[0], values[1]));
+                inputData.mediaMu.push_back(std::complex<double>(values[2], values[3]));
             }
 
             // Read incident field amplitude
@@ -141,7 +141,7 @@ public:
 
             // if the amplitude is complex
             if (pos != std::string::npos)
-                inputData.Einc = std::complex<float>(
+                inputData.Einc = std::complex<double>(
                     std::stof(line.substr(0, pos)),
                     std::stof(line.substr(pos+1, std::string::npos))
                 );

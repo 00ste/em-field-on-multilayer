@@ -13,14 +13,14 @@
  *  (Hx, Hy, Hz) are the x,y,z coordinates of the magnetic field at (xp, zp).
  */
 struct OutputDataLine {
-    float xp;
-    float zp;
-    std::complex<float> Ex;
-    std::complex<float> Ey;
-    std::complex<float> Ez;
-    std::complex<float> Hx;
-    std::complex<float> Hy;
-    std::complex<float> Hz;
+    double xp;
+    double zp;
+    std::complex<double> Ex;
+    std::complex<double> Ey;
+    std::complex<double> Ez;
+    std::complex<double> Hx;
+    std::complex<double> Hy;
+    std::complex<double> Hz;
 };
 
 /**
@@ -34,14 +34,14 @@ enum Polarization { TE, TM };
 struct InputData {
     InputData() = default;
 
-    float startZ = -5;
+    double startZ = -5;
     std::size_t numberOfMedia;
-    std::vector<float> mediaZInterfaces;
-    std::vector<std::complex<float>> mediaEpsilon;
-    std::vector<std::complex<float>> mediaMu;
-    std::complex<float> Einc;
-    float angleOfIncidence;
-    float wavelength;
+    std::vector<double> mediaZInterfaces;
+    std::vector<std::complex<double>> mediaEpsilon;
+    std::vector<std::complex<double>> mediaMu;
+    std::complex<double> Einc;
+    double angleOfIncidence;
+    double wavelength;
     Polarization polarization;
 };
 
@@ -54,12 +54,12 @@ struct MediumData {
         sinTheta{ 0 }, cosTheta{ 0 }, wavenumber{ 0 },
         transmissionMatrix{ Matrix2x2{ 0, 0, 0, 0 } } {}
 
-    float zBottom;
-    std::complex<float> refractionIndex;
-    std::complex<float> waveImpedance;
-    std::complex<float> sinTheta;
-    std::complex<float> cosTheta;
-    std::complex<float> wavenumber;
+    double zBottom;
+    std::complex<double> refractionIndex;
+    std::complex<double> waveImpedance;
+    std::complex<double> sinTheta;
+    std::complex<double> cosTheta;
+    std::complex<double> wavenumber;
     Matrix2x2 transmissionMatrix;
 };
 
@@ -67,8 +67,8 @@ struct MediumData {
  *  The x, z coordinates of a point where the EM fields can be calculated.
  */
 struct Point {
-    float x;
-    float z;
+    double x;
+    double z;
 };
 
 #endif /* DATA_H */

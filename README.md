@@ -56,4 +56,4 @@ xp1, zp1
 ...
 xpn, zpn
 ```
-The input points file is a list of pairs `xp, zp`, which are both real floating point numbers.
+The input points file is a list of pairs `xp, zp`, which are both real doubleing point numbers.
