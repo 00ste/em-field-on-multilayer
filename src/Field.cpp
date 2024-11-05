@@ -3,6 +3,8 @@
 #include <cerrno>
 #include <cmath>
 
+#define DEBUG
+
 Field::Field(InputData inputData)
     : polarization{inputData.polarization}, wavelength{ inputData.wavelength },
     E_T0{ 0, 0 }, startZ{ inputData.startZ } {
@@ -147,11 +149,21 @@ Field::Field(InputData inputData)
     std::complex<double> temp = - media[numMedia-2].transmissionMatrix.e21 /
         media[numMedia-2].transmissionMatrix.e22;
     E_T0.e2 = temp * E_T0.e1;
+
+#ifdef DEBUG
+    std::cout << "E_T0 Forward:  " << E_T0.e1 << std::endl;
+    std::cout << "E_T0 Backward: " << E_T0.e2 << std::endl;
+    std::cout << "E_T0 Total:    " << E_T0.e1 + E_T0.e2 << std::endl;
+#endif /* DEBUG */
 }
 
 void Field::calculateEHFields(double xp, double zp) {
     // Find which medium contains the point where the fields should be calculated.
     std::size_t mediumIndex = findMedium(zp);
+
+#ifdef DEBUG
+    std::cout << "Point x=" << xp << ", z=" << zp << " is in the medium m" << mediumIndex << std::endl;
+#endif /* DEBUG */
 
     // Calculate forward and backward transverse components of E at zp
     Vector2 E_Tzp = Vector2(E_T0);
@@ -213,10 +225,8 @@ void Field::calculateEHFields(double xp, double zp) {
 }
 
 std::size_t Field::findMedium(double zp) {
-    if (zp < media[0].zBottom) return 0;
-    
     for (std::size_t i = 0; i < numMedia-1; i++) {
-        if (zp >= media[i].zBottom) return i;
+        if (zp < media[i].zBottom) return i;
     }
     return numMedia-1;
 }
