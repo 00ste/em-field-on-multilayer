@@ -34,7 +34,6 @@ enum Polarization { TE, TM };
 struct InputData {
     InputData() = default;
 
-    double startZ = -5;
     std::size_t numberOfMedia;
     std::vector<double> mediaZInterfaces;
     std::vector<std::complex<double>> mediaEpsilon;

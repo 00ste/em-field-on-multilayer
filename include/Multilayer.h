@@ -10,7 +10,7 @@
 #include <vector>
 #include <cmath>
 
-class Field {
+class Multilayer {
 public:
     // CONSTANTS
     const double C0 = 299792458.0;
@@ -18,7 +18,6 @@ public:
     const double MI0 = 4*PI*0.0000001;
     const double ETA0 = C0 * MI0;
     const std::complex<double> I = std::complex(0.f, 1.f);
-    const std::complex<double> ONE = std::complex(1.f, 0.f);
 
     // Output variables
     std::complex<double> E[3];
@@ -29,12 +28,11 @@ public:
     std::vector<MediumData> media;
 
     // Information regarding the incident field
-    double startZ;
     double wavelength;
     Polarization polarization;
     Vector2 E_T0;
 
-    Field(InputData inputData);
+    Multilayer(InputData inputData);
 
     /**
      *  Calculcates the electric and magnetic fields E and H at the

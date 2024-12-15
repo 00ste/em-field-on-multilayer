@@ -4,7 +4,7 @@
 
 #include "../include/Data.h"
 #include "../include/FileInterface.h"
-#include "../include/Field.h"
+#include "../include/Multilayer.h"
 
 void printHelp(char* exeName) {
     std::cout << "Usage: " << exeName << " input-data-file input-points-file output-file" << std::endl;
@@ -28,8 +28,8 @@ int main(int argc, char* argv[]) {
 
     output.reserve(points.size());
 
-    // Init Field class
-    Field f = Field{ data };
+    // Init Multilayer class
+    Multilayer f = Multilayer{ data };
 
     for (Point p : points) {
         // Calculate fields for all points

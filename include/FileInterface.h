@@ -88,16 +88,11 @@ public:
 
         std::string line;
         try {
-            // Read z coordinate of each interface and start z
+            // Read z coordinate of each interface
             inputData.numberOfMedia = 0;
             std::getline(inputFile, line);
             std::string token;
             std::size_t pos = 0;
-            
-            // The first number in the first line is the start z
-            pos = line.find(",");
-            inputData.startZ = std::stof(line.substr(0, pos));
-            line.erase(0, pos + 1);
 
             // The following numbers in the first line are the z coords of each interface
             // Also count the number of interfaces

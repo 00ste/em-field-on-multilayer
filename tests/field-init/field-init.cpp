@@ -1,4 +1,4 @@
-#include "../../include/Field.h"
+#include "../../include/Multilayer.h"
 #include "../../include/Data.h"
 #include "../../include/FileInterface.h"
 
@@ -11,7 +11,7 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
-    Field field = Field(inputData);
+    Multilayer field = Multilayer(inputData);
 
     // Print calculated data
     std::cout << "- E_T0+: " << field.E_T0.e11 << std::endl;

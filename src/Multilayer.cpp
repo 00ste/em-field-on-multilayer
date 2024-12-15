@@ -1,13 +1,11 @@
-#include "../include/Field.h"
+#include "../include/Multilayer.h"
 #include <iostream>
 #include <cerrno>
 #include <cmath>
 
-#define DEBUG
-
-Field::Field(InputData inputData)
+Multilayer::Multilayer(InputData inputData)
     : polarization{inputData.polarization}, wavelength{ inputData.wavelength },
-    E_T0{ 0, 0 }, startZ{ inputData.startZ } {
+    E_T0{ 0, 0 } {
     
     numMedia = inputData.numberOfMedia;
     media.resize(numMedia);
@@ -27,7 +25,7 @@ Field::Field(InputData inputData)
         media[i].refractionIndex =  std::sqrt(inputData.mediaMu[i] * inputData.mediaEpsilon[i]);
         media[i].waveImpedance = ETA0 * sqrt(inputData.mediaMu[i] / inputData.mediaEpsilon[i]);
         media[i].sinTheta = media[0].sinTheta * media[0].refractionIndex / media[i].refractionIndex;
-        media[i].cosTheta = std::sqrt(ONE - std::pow(media[i].sinTheta, 2));
+        media[i].cosTheta = std::sqrt(1.0 - std::pow(media[i].sinTheta, 2));
         media[i].wavenumber = 2*PI * media[i].refractionIndex / inputData.wavelength;
     }
 
@@ -62,15 +60,15 @@ Field::Field(InputData inputData)
         (refractionIndexNext - refractionIndexCurr) /
         (refractionIndexNext + refractionIndexCurr);
 
-    std::complex<double> transmissionCoefficient = ONE + reflectionCoefficient;
+    std::complex<double> transmissionCoefficient = 1.0 + reflectionCoefficient;
 
     // Calculate matching and propagation matrices
     Matrix2x2 matchingMatrix = Matrix2x2(
-        ONE / transmissionCoefficient, reflectionCoefficient / transmissionCoefficient,
-        reflectionCoefficient / transmissionCoefficient, ONE / transmissionCoefficient
+        1.0 / transmissionCoefficient, reflectionCoefficient / transmissionCoefficient,
+        reflectionCoefficient / transmissionCoefficient, 1.0 / transmissionCoefficient
     );
 
-    std::complex<double> phaseThickness = 2*PI * media[0].wavenumber * media[0].cosTheta * (media[0].zBottom - startZ);
+    std::complex<double> phaseThickness = 2*PI * media[0].wavenumber * media[0].cosTheta * media[0].zBottom;
     Matrix2x2 propagationMatrix = Matrix2x2(
         std::exp(-I * phaseThickness), 0,
         0, std::exp(I * phaseThickness)
@@ -106,12 +104,12 @@ Field::Field(InputData inputData)
             (refractionIndexNext - refractionIndexCurr) /
             (refractionIndexNext + refractionIndexCurr);
 
-        transmissionCoefficient = ONE + reflectionCoefficient;
+        transmissionCoefficient = 1.0 + reflectionCoefficient;
 
         // Calculate matching and propagation matrices
         matchingMatrix = Matrix2x2(
-            ONE / transmissionCoefficient, reflectionCoefficient / transmissionCoefficient,
-            reflectionCoefficient / transmissionCoefficient, ONE / transmissionCoefficient
+            1.0 / transmissionCoefficient, reflectionCoefficient / transmissionCoefficient,
+            reflectionCoefficient / transmissionCoefficient, 1.0 / transmissionCoefficient
         );
 
         std::complex phaseThickness = media[i].wavenumber * media[i].cosTheta * (media[i].zBottom - media[i-1].zBottom);
@@ -157,7 +155,7 @@ Field::Field(InputData inputData)
 #endif /* DEBUG */
 }
 
-void Field::calculateEHFields(double xp, double zp) {
+void Multilayer::calculateEHFields(double xp, double zp) {
     // Find which medium contains the point where the fields should be calculated.
     std::size_t mediumIndex = findMedium(zp);
 
@@ -224,17 +222,17 @@ void Field::calculateEHFields(double xp, double zp) {
     }    
 }
 
-std::size_t Field::findMedium(double zp) {
+std::size_t Multilayer::findMedium(double zp) {
     for (std::size_t i = 0; i < numMedia-1; i++) {
         if (zp < media[i].zBottom) return i;
     }
     return numMedia-1;
 }
 
-Matrix2x2 Field::propagationMatrix(std::size_t mediumIndex, double zp) {
+Matrix2x2 Multilayer::propagationMatrix(std::size_t mediumIndex, double zp) {
     std::complex<double> phaseThickness = media[mediumIndex].wavenumber * media[mediumIndex].cosTheta;
     if (mediumIndex == 0)
-        phaseThickness *= zp - startZ;
+        phaseThickness *= zp;
     else
         phaseThickness *= zp - media[mediumIndex-1].zBottom;
 
