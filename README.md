@@ -1,6 +1,6 @@
 # em-fields-on-multilayer
 
-Tool that calculates the values of the electromagnetic field which is obliquely incident on a multilayer.
+Tool that solves the problem of oblique incidence of a plain, uniform, monocromatic electromagnetic wave on a multilayer structure.
 
 # Dependencies
 
