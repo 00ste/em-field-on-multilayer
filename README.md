@@ -14,13 +14,15 @@ Simply run `make` inside the root directory of the project to build the full too
 # Usage
 
 ```bash
-./fields path/to/input-data-file.txt path/to/input-points-file.txt path/to/output-file.txt
+./fields path/to/input-data-file.txt path/to/input-points-file.txt path/to/output-file.txt [-p]
 ```
 
 Where:
 - `path/to/input-data-file.txt` is the path to the file that contains data about the experiment to be simulated.
 - `path/to/input-points-file.txt` is the path to the file that contains the list of points where the fields should be calculated.
 - `path/to/output-file.txt` is the path to the file that will store the results of the simulated experiment. The file will be overwritten.
+
+If `-p` is specified, the output will be expressed in terms of magnitude and phase instead of real and imaginary part.
 
 > Examples of both input files can be found inside the `tests/test_data` directory.
 
@@ -57,3 +59,21 @@ xp1, zp1
 xpn, zpn
 ```
 The input points file is a list of pairs `xp, zp`, which are both real doubleing point numbers.
+
+## Output format
+
+The output file will be a `.csv` file containing one row for every point, and the following columns:
+- The x coordinate of the point.
+- The z coordinate of the point.
+- The real part of the x component of E (or the magnitude of the x component of E is `-p` is specified).
+- The imaginary part of the x component of E (or the phase of the x component of E is `-p` is specified).
+- The real part of the y component of E (or the magnitude of the y component of E is `-p` is specified).
+- The imaginary part of the y component of E (or the phase y of the component of E is `-p` is specified).
+- The real part of the z component of E (or the magnitude of the z component of E is `-p` is specified).
+- The imaginary part of the z component of E (or the phase of the z component of E is `-p` is specified).
+- The real part of the x component of H (or the magnitude of the x component of H is `-p` is specified).
+- The imaginary part of the x component of H (or the phase of the x component of H is `-p` is specified).
+- The real part of the y component of H (or the magnitude of the y component of H is `-p` is specified).
+- The imaginary part of the y component of H (or the phase of the y component of H is `-p` is specified).
+- The real part of the z component of H (or the magnitude of the z component of H is `-p` is specified).
+- The imaginary part of the z component of H (or the phase of the z component of H is `-p` is specified).
