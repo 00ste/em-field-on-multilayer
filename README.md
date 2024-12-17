@@ -1,6 +1,6 @@
-# em-fields-on-multilayer
+# em-field-on-multilayer
 
-Tool that solves the problem of oblique incidence of a plain, uniform, monocromatic electromagnetic wave on a multilayer structure.
+Tool that solves the problem of oblique incidence of a plane, uniform, monocromatic electromagnetic wave on a multilayer structure.
 
 # Dependencies
 
